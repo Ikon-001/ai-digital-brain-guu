@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 // Routes (we'll add these as we build)
-// app.use('/api/chat', require('./routes/chat'));
+app.use('/api/chat', require('./routes/chat'));
 // app.use('/api/notify', require('./routes/notify'));
 // app.use('/api/logs', require('./routes/logs'));
 

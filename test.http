@@ -1,0 +1,7 @@
+POST http://localhost:5000/api/chat
+Content-Type: application/json
+
+{
+    "message": "What is Gregory University Uturu known for?",
+    "user_email": "test@student.guu.edu.ng"
+}
