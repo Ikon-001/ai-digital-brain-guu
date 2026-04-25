@@ -5,3 +5,15 @@ Content-Type: application/json
     "message": "What is Gregory University Uturu known for?",
     "user_email": "test@student.guu.edu.ng"
 }
+
+###
+
+POST http://localhost:5000/api/notify
+Content-Type: application/json
+
+{
+    "title": "Test Notification",
+    "message": "This is a test notification from the AI Digital Brain GUU system.",
+    "target": "all",
+    "sent_by": "admin"
+}
