@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
+const Groq = require('groq-sdk');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 router.post('/', async (req, res) => {
     const { message, user_email } = req.body;
@@ -12,24 +14,21 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: `You are the AI assistant for Gregory University, Uturu (GUU), a private university located in Uturu, Abia State, Nigeria, established in 2012. You help students and staff with academic and administrative queries. Be helpful, friendly, and concise.\n\nStudent question: ${message}`
-                        }]
-                    }]
-                })
-            }
-        );
+        const completion = await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'You are the AI assistant for Gregory University, Uturu (GUU), a private university located in Uturu, Abia State, Nigeria, established in 2012. You help students and staff with academic and administrative queries. Be helpful, friendly, and concise.'
+                },
+                {
+                    role: 'user',
+                    content: message
+                }
+            ]
+        });
 
-        const data = await response.json();
-        console.log('Gemini response:', JSON.stringify(data, null, 2));
-const aiResponse = data.candidates[0].content.parts[0].text;
+        const aiResponse = completion.choices[0].message.content;
 
         // Save to Supabase
         await supabase.from('chat_logs').insert({
