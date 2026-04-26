@@ -7,6 +7,7 @@ import NotificationForm from './pages/NotificationForm'
 import ChatLogs from './pages/ChatLogs'
 import NotificationLogs from './pages/NotificationLogs'
 import UserManagement from './pages/UserManagement'
+import Register from './pages/Register'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/admin/notify" element={<AdminAuth><NotificationForm /></AdminAuth>} />
         <Route path="/admin/chat-logs" element={<AdminAuth><ChatLogs /></AdminAuth>} />
         <Route path="/admin/notification-logs" element={<AdminAuth><NotificationLogs /></AdminAuth>} />

@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/notify', require('./routes/notify'));
 app.use('/api/logs', require('./routes/logs'));
+app.use('/api/users', require('./routes/users'));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
