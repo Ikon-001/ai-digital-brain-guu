@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import AdminAuth from './components/AdminAuth'
 import Home from './pages/Home'
 import Chat from './pages/Chat'
 import NotificationForm from './pages/NotificationForm'
@@ -14,10 +15,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/chat" element={<Chat />} />
-        <Route path="/admin/notify" element={<NotificationForm />} />
-        <Route path="/admin/chat-logs" element={<ChatLogs />} />
-        <Route path="/admin/notification-logs" element={<NotificationLogs />} />
-        <Route path="/admin/users" element={<UserManagement />} />
+        <Route path="/admin/notify" element={<AdminAuth><NotificationForm /></AdminAuth>} />
+        <Route path="/admin/chat-logs" element={<AdminAuth><ChatLogs /></AdminAuth>} />
+        <Route path="/admin/notification-logs" element={<AdminAuth><NotificationLogs /></AdminAuth>} />
+        <Route path="/admin/users" element={<AdminAuth><UserManagement /></AdminAuth>} />
       </Routes>
     </>
   )
