@@ -38,10 +38,32 @@ function Register() {
         <select name="department" value={form.department} onChange={handleChange} style={{ padding: '0.8rem', borderRadius: '8px', border: 'none', background: '#0f0f1a', color: '#fff', fontSize: '1rem' }}>
           <option value="">Select department</option>
           <option value="Computer Science">Computer Science</option>
-          <option value="Economics">Economics</option>
-          <option value="Law">Law</option>
+          <option value="Computer Engineering">Computer Engineering</option>
+          <option value="Mathematics and Statistics">Mathematics and Statistics</option>
           <option value="Biochemistry">Biochemistry</option>
+          <option value="Microbiology">Microbiology</option>
+          <option value="Medicine and Surgery">Medicine and Surgery</option>
+          <option value="Nursing Science">Nursing Science</option>
+          <option value="Pharmacy">Pharmacy</option>
+          <option value="Physiotherapy">Physiotherapy</option>
+          <option value="Law">Law</option>
+          <option value="Civil Engineering">Civil Engineering</option>
+          <option value="Electrical Engineering">Electrical Engineering</option>
+          <option value="Mechanical Engineering">Mechanical Engineering</option>
+          <option value="Agriculture">Agriculture</option>
+          <option value="Theatre and Media Studies">Theatre and Media Studies</option>
+          <option value="Languages and Literary Studies">Languages and Literary Studies</option>
+          <option value="History and International Studies">History and International Studies</option>
+          <option value="Business Administration">Business Administration</option>
+          <option value="Economics">Economics</option>
+          <option value="Accounting">Accounting</option>
           <option value="Mass Communication">Mass Communication</option>
+          <option value="Education Biology">Education Biology</option>
+          <option value="Education Chemistry">Education Chemistry</option>
+          <option value="Education Mathematics">Education Mathematics</option>
+          <option value="Education Physics">Education Physics</option>
+          <option value="Education Guidance and Counseling">Education Guidance and Counseling</option>
+          <option value="Environmental Science">Environmental Science</option>
         </select>
         <select name="level" value={form.level} onChange={handleChange} style={{ padding: '0.8rem', borderRadius: '8px', border: 'none', background: '#0f0f1a', color: '#fff', fontSize: '1rem' }}>
           <option value="">Select level</option>
@@ -49,6 +71,8 @@ function Register() {
           <option value="200">200 Level</option>
           <option value="300">300 Level</option>
           <option value="400">400 Level</option>
+          <option value="500">500 Level</option>
+          <option value="600">600 Level</option>
         </select>
         <button onClick={handleSubmit} disabled={loading} style={{ background: '#6c63ff', color: '#fff', border: 'none', padding: '0.8rem', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer' }}>
           {loading ? 'Registering...' : 'Register'}
