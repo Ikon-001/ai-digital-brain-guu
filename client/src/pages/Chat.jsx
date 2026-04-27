@@ -22,7 +22,7 @@ function Chat() {
       })
       setMessages(prev => [...prev, { role: 'ai', text: res.data.response }])
     } catch {
-      setMessages(prev => [...prev, { role: 'ai', text: 'Error getting response. Please try again.' }])
+      setMessages(prev => [...prev, { role: 'ai', text: 'The server is waking up or unavailable. Please wait 30 seconds and try again.' }])
     } finally {
       setLoading(false)
     }
@@ -40,7 +40,7 @@ function Chat() {
             </span>
           </div>
         ))}
-        {loading && <p style={{ color: '#a0aec0' }}>Thinking...</p>}
+        {loading && <p style={{ color: '#a0aec0' }}>Thinking... (first message may take up to 60 seconds if server is waking up)</p>}
       </div>
       <div style={{ display: 'flex', gap: '1rem', width: '100%', maxWidth: '700px' }}>
         <input
