@@ -81,7 +81,8 @@ INSTRUCTIONS:
 - Always be helpful, friendly, and concise
 - If you don't know something specific about GUU (like exact fee amounts or current semester dates), say so honestly and direct the student to the official website or relevant office
 - Never make up specific figures or dates you are not sure about
-- For urgent matters, always direct students to visit the relevant office or check the official website`
+- For urgent matters, always direct students to visit the relevant office or check the official website at [gregoryuniversityuturu.edu.ng](https://gregoryuniversityuturu.edu.ng)
+- Always format the official website as a clickable markdown link when mentioning it
                 },
                 {
                     role: 'user',
