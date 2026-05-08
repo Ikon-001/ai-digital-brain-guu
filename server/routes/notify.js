@@ -5,37 +5,72 @@ const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 router.post('/', async (req, res) => {
-    const { title, message, target, sent_by } = req.body;
+    const { title, message, targets, logic, sent_by } = req.body;
 
-    if (!title || !message || !target) {
-        return res.status(400).json({ error: 'Title, message and target are required' });
+    if (!title || !message || !targets || targets.length === 0) {
+        return res.status(400).json({ error: 'Title, message and at least one target are required' });
     }
 
     try {
-        // Get recipient emails from Supabase
-        let query = supabase.from('users').select('email');
+        let emails = [];
 
-        if (target !== 'all') {
-            // target format: "dept:Computer Science" or "level:300"
-            const [type, value] = target.split(':');
-            if (type === 'dept') {
-                query = query.eq('department', value);
-            } else if (type === 'level') {
-                query = query.eq('level', value);
+        if (logic === 'AND') {
+            // AND logic — user must match ALL targets
+            let query = supabase.from('users').select('email');
+
+            for (const target of targets) {
+                if (target === 'all') {
+                    // all overrides AND logic
+                    break;
+                } else if (target === 'all_students') {
+                    query = query.eq('role', 'student');
+                } else if (target === 'all_staff') {
+                    query = query.eq('role', 'admin');
+                } else if (target.startsWith('dept:')) {
+                    query = query.eq('department', target.replace('dept:', ''));
+                } else if (target.startsWith('level:')) {
+                    query = query.eq('level', parseInt(target.replace('level:', '')));
+                }
             }
+
+            const { data, error } = await query;
+            if (error) throw error;
+            emails = data?.map(u => u.email) || [];
+
+        } else {
+            // OR logic — send to anyone matching ANY target
+            let emailSet = new Set();
+
+            for (const target of targets) {
+                let query = supabase.from('users').select('email');
+
+                if (target === 'all') {
+                    const { data } = await supabase.from('users').select('email');
+                    data?.forEach(u => emailSet.add(u.email));
+                    continue;
+                } else if (target === 'all_students') {
+                    query = query.eq('role', 'student');
+                } else if (target === 'all_staff') {
+                    query = query.eq('role', 'admin');
+                } else if (target.startsWith('dept:')) {
+                    query = query.eq('department', target.replace('dept:', ''));
+                } else if (target.startsWith('level:')) {
+                    query = query.eq('level', parseInt(target.replace('level:', '')));
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+                data?.forEach(u => emailSet.add(u.email));
+            }
+
+            emails = [...emailSet];
         }
 
-        const { data: users, error: userError } = await query;
-
-        if (userError) throw userError;
-
-        if (!users || users.length === 0) {
-            return res.status(404).json({ error: 'No users found for this target group' });
+        if (emails.length === 0) {
+            return res.status(404).json({ error: 'No users found for the selected target groups' });
         }
 
         // Send emails via SendGrid
-        const emails = users.map(u => u.email);
-
         const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
             method: 'POST',
             headers: {
@@ -43,9 +78,7 @@ router.post('/', async (req, res) => {
                 'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`
             },
             body: JSON.stringify({
-                personalizations: [{
-                    to: emails.map(email => ({ email }))
-                }],
+                personalizations: [{ to: emails.map(email => ({ email })) }],
                 from: { email: process.env.SENDGRID_FROM_EMAIL, name: 'GUU AI Digital Brain' },
                 subject: title,
                 content: [{ type: 'text/plain', value: message }]
@@ -57,18 +90,17 @@ router.post('/', async (req, res) => {
             throw new Error(JSON.stringify(sgError));
         }
 
-        // Save notification log to Supabase
         await supabase.from('notifications').insert({
             title,
             message,
-            target,
+            target: `(${logic}) ${targets.join(', ')}`,
             sent_by: sent_by || 'admin',
             status: 'sent'
         });
 
-        res.json({ 
-            success: true, 
-            message: `Notification sent to ${emails.length} recipient(s)` 
+        res.json({
+            success: true,
+            message: `Notification sent to ${emails.length} recipient(s)`
         });
 
     } catch (error) {

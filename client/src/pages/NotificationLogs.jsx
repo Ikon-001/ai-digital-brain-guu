@@ -1,7 +1,42 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Link, useLocation } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL
+
+const adminLinks = [
+  { to: '/admin/notify', label: 'Send Notification', icon: 'campaign' },
+  { to: '/admin/chat-logs', label: 'Chat Logs', icon: 'chat_bubble' },
+  { to: '/admin/notification-logs', label: 'Notification Logs', icon: 'notifications' },
+  { to: '/admin/users', label: 'User Management', icon: 'group' },
+]
+
+function AdminSidebar() {
+  const location = useLocation()
+  return (
+    <aside className="w-64 shrink-0 hidden md:block">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-4 sticky top-24">
+        <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-4 px-2">Admin Panel</p>
+        <nav className="space-y-1">
+          {adminLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                location.pathname === link.to
+                  ? 'bg-primary-container text-white'
+                  : 'text-on-surface dark:text-slate-300 hover:bg-surface-container dark:hover:bg-slate-700'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </aside>
+  )
+}
 
 function NotificationLogs() {
   const [logs, setLogs] = useState([])
@@ -16,21 +51,63 @@ function NotificationLogs() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0f1a', color: '#fff', padding: '2rem' }}>
-      <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Notification Logs</h2>
-      {loading && <p style={{ textAlign: 'center', color: '#a0aec0' }}>Loading... (may take up to 60 seconds if server is waking up)</p>}
-      {error && <p style={{ textAlign: 'center', color: '#ff6584' }}>{error}</p>}
-      {!loading && !error && logs.length === 0 && <p style={{ textAlign: 'center', color: '#a0aec0' }}>No notifications sent yet.</p>}
-      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {logs.map((log, i) => (
-          <div key={i} style={{ background: '#1a1a2e', borderRadius: '10px', padding: '1.2rem' }}>
-            <p style={{ color: '#a0aec0', fontSize: '0.8rem', marginBottom: '0.5rem' }}>{new Date(log.created_at).toLocaleString()} — Target: {log.target}</p>
-            <p><strong style={{ color: '#6c63ff' }}>Title:</strong> {log.title}</p>
-            <p><strong style={{ color: '#a0aec0' }}>Message:</strong> {log.message}</p>
-            <p><strong style={{ color: '#48bb78' }}>Sent by:</strong> {log.sent_by}</p>
+    <div className="bg-surface dark:bg-slate-950 min-h-screen pt-16 flex flex-col">
+      <main className="flex-1 px-4 py-12">
+        <div className="max-w-6xl mx-auto flex gap-8">
+
+          <AdminSidebar />
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-xl">notifications</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-primary dark:text-slate-50 tracking-tight">Notification Logs</h1>
+                <p className="text-xs text-on-surface-variant dark:text-slate-400">All sent notifications</p>
+              </div>
+            </div>
+
+            {loading && (
+              <div className="text-center py-16 text-on-surface-variant dark:text-slate-400 text-sm">
+                Loading... (may take up to 60 seconds if server is waking up)
+              </div>
+            )}
+            {error && (
+              <div className="p-4 rounded-xl text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                {error}
+              </div>
+            )}
+            {!loading && !error && logs.length === 0 && (
+              <div className="text-center py-16 text-on-surface-variant dark:text-slate-400 text-sm">No notifications sent yet.</div>
+            )}
+
+            <div className="space-y-4">
+              {logs.map((log, i) => (
+                <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container dark:bg-slate-700 rounded-full text-xs font-semibold text-on-surface-variant dark:text-slate-300">
+                      <span className="material-symbols-outlined text-[14px]">group</span>
+                      {log.target}
+                    </span>
+                    <span className="text-xs text-on-surface-variant dark:text-slate-500">{new Date(log.created_at).toLocaleString()}</span>
+                  </div>
+                  <h3 className="font-semibold text-primary dark:text-slate-100 mb-2">{log.title}</h3>
+                  <p className="text-sm text-on-surface-variant dark:text-slate-400 mb-4">{log.message}</p>
+                  <div className="flex items-center gap-1.5 text-xs text-on-surface-variant dark:text-slate-500">
+                    <span className="material-symbols-outlined text-[14px]">person</span>
+                    Sent by {log.sent_by}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      </main>
+
+      <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+        <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
+      </footer>
     </div>
   )
 }

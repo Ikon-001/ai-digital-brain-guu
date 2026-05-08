@@ -1,7 +1,42 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Link, useLocation } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL
+
+const adminLinks = [
+  { to: '/admin/notify', label: 'Send Notification', icon: 'campaign' },
+  { to: '/admin/chat-logs', label: 'Chat Logs', icon: 'chat_bubble' },
+  { to: '/admin/notification-logs', label: 'Notification Logs', icon: 'notifications' },
+  { to: '/admin/users', label: 'User Management', icon: 'group' },
+]
+
+function AdminSidebar() {
+  const location = useLocation()
+  return (
+    <aside className="w-64 shrink-0 hidden md:block">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-4 sticky top-24">
+        <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-4 px-2">Admin Panel</p>
+        <nav className="space-y-1">
+          {adminLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                location.pathname === link.to
+                  ? 'bg-primary-container text-white'
+                  : 'text-on-surface dark:text-slate-300 hover:bg-surface-container dark:hover:bg-slate-700'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </aside>
+  )
+}
 
 function UserManagement() {
   const [users, setUsers] = useState([])
@@ -16,35 +51,80 @@ function UserManagement() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0f1a', color: '#fff', padding: '2rem' }}>
-      <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>User Management</h2>
-      {loading && <p style={{ textAlign: 'center', color: '#a0aec0' }}>Loading... (may take up to 60 seconds if server is waking up)</p>}
-      {error && <p style={{ textAlign: 'center', color: '#ff6584' }}>{error}</p>}
-      {!loading && !error && users.length === 0 && <p style={{ textAlign: 'center', color: '#a0aec0' }}>No users found.</p>}
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: '#1a1a2e' }}>
-              <th style={{ padding: '0.8rem', textAlign: 'left', color: '#6c63ff' }}>Name</th>
-              <th style={{ padding: '0.8rem', textAlign: 'left', color: '#6c63ff' }}>Email</th>
-              <th style={{ padding: '0.8rem', textAlign: 'left', color: '#6c63ff' }}>Department</th>
-              <th style={{ padding: '0.8rem', textAlign: 'left', color: '#6c63ff' }}>Level</th>
-              <th style={{ padding: '0.8rem', textAlign: 'left', color: '#6c63ff' }}>Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #2d2d44' }}>
-                <td style={{ padding: '0.8rem' }}>{user.name}</td>
-                <td style={{ padding: '0.8rem', color: '#a0aec0' }}>{user.email}</td>
-                <td style={{ padding: '0.8rem' }}>{user.department}</td>
-                <td style={{ padding: '0.8rem' }}>{user.level}</td>
-                <td style={{ padding: '0.8rem', color: '#48bb78' }}>{user.role}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="bg-surface dark:bg-slate-950 min-h-screen pt-16 flex flex-col">
+      <main className="flex-1 px-4 py-12">
+        <div className="max-w-6xl mx-auto flex gap-8">
+
+          <AdminSidebar />
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-xl">group</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-primary dark:text-slate-50 tracking-tight">User Management</h1>
+                <p className="text-xs text-on-surface-variant dark:text-slate-400">{users.length} registered users</p>
+              </div>
+            </div>
+
+            {loading && (
+              <div className="text-center py-16 text-on-surface-variant dark:text-slate-400 text-sm">
+                Loading... (may take up to 60 seconds if server is waking up)
+              </div>
+            )}
+            {error && (
+              <div className="p-4 rounded-xl text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                {error}
+              </div>
+            )}
+
+            {!loading && !error && (
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 shadow-sm overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-surface-container-low dark:bg-slate-700 border-b border-outline-variant dark:border-slate-600">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Department</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Level / Staff Role</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant dark:divide-slate-700">
+                    {users.map((user, i) => (
+                      <tr key={i} className="hover:bg-surface-container-low dark:hover:bg-slate-700/50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-on-surface dark:text-slate-100">{user.name}</td>
+                        <td className="px-6 py-4 text-sm text-on-surface-variant dark:text-slate-400">{user.email}</td>
+                        <td className="px-6 py-4 text-sm text-on-surface dark:text-slate-300">{user.department}</td>
+                        <td className="px-6 py-4 text-sm text-on-surface dark:text-slate-300">
+                          {user.role === 'admin'
+                            ? user.staff_role || '—'
+                            : user.level ? `${user.level} Level` : '—'
+                          }
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            user.role === 'admin'
+                              ? 'bg-primary-container text-white'
+                              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          }`}>
+                            {user.role}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+        <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
+      </footer>
     </div>
   )
 }
