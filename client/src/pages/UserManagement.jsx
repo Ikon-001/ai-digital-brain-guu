@@ -17,16 +17,12 @@ function AdminSidebar({ open, onClose }) {
   return (
     <>
       {open && (
-        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
       )}
-      <aside className={`
-        fixed top-0 left-0 h-full w-64 z-50 bg-white dark:bg-slate-800 border-r border-outline-variant dark:border-slate-700 p-4 transition-transform duration-300
-        md:static md:translate-x-0 md:h-auto md:z-auto md:rounded-2xl md:border md:shrink-0
-        ${open ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      <aside className={`fixed top-0 left-0 h-full w-64 z-50 bg-white dark:bg-slate-800 border-r border-outline-variant dark:border-slate-700 p-4 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between mb-4 px-2">
           <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Admin Panel</p>
-          <button onClick={onClose} className="md:hidden text-slate-500 dark:text-slate-400">
+          <button onClick={onClose} className="text-slate-500 dark:text-slate-400">
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
@@ -55,6 +51,7 @@ function AdminSidebar({ open, onClose }) {
 function UserManagement() {
   const { dark, setDark } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -72,24 +69,15 @@ function UserManagement() {
 
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 h-16 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-        >
+        <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
           <span className="material-symbols-outlined text-[20px]">arrow_back</span>
         </button>
         <span className="text-sm font-bold text-[#002147] dark:text-slate-50">Admin Panel</span>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDark(!dark)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-          >
+          <button onClick={() => setDark(!dark)} className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
             <span className="material-symbols-outlined text-[20px]">{dark ? 'light_mode' : 'dark_mode'}</span>
           </button>
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
             <span className="material-symbols-outlined text-[20px]">menu</span>
           </button>
         </div>

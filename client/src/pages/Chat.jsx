@@ -90,18 +90,17 @@ function Chat() {
 
           {/* Input */}
           <div className="pt-4 bg-surface dark:bg-slate-950 sticky bottom-0">
-            <div className="relative flex items-center">
-              <textarea
+            <div className="flex items-center gap-2">
+              <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-                placeholder="Ask about courses, enrollment, or campus life..."
-                rows={1}
-                className="w-full pl-5 pr-16 py-4 bg-white dark:bg-slate-800 border border-outline-variant dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary-container focus:border-primary-container shadow-sm resize-none font-sans text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500"
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage() } }}
+                placeholder="Ask about courses, enrollment, campus life..."
+                className="flex-1 px-5 py-4 bg-white dark:bg-slate-800 border border-outline-variant dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary-container focus:border-primary-container shadow-sm text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 outline-none"
               />
               <button
                 onClick={sendMessage}
-                className="absolute right-3 bg-primary-container text-white w-10 h-10 rounded-xl flex items-center justify-center hover:opacity-90 transition-all active:scale-95 shadow-md"
+                className="bg-primary-container text-white w-12 h-12 rounded-xl flex items-center justify-center hover:opacity-90 transition-all active:scale-95 shadow-md shrink-0"
               >
                 <span className="material-symbols-outlined text-[20px]">send</span>
               </button>
@@ -120,7 +119,6 @@ function Chat() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
       </footer>
