@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useTheme } from '../context/ThemeContext'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -11,17 +12,30 @@ const adminLinks = [
   { to: '/admin/users', label: 'User Management', icon: 'group' },
 ]
 
-function AdminSidebar() {
+function AdminSidebar({ open, onClose }) {
   const location = useLocation()
   return (
-    <aside className="w-64 shrink-0 hidden md:block">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-4 sticky top-24">
-        <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-4 px-2">Admin Panel</p>
+    <>
+      {open && (
+        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={onClose} />
+      )}
+      <aside className={`
+        fixed top-0 left-0 h-full w-64 z-50 bg-white dark:bg-slate-800 border-r border-outline-variant dark:border-slate-700 p-4 transition-transform duration-300
+        md:static md:translate-x-0 md:h-auto md:z-auto md:rounded-2xl md:border md:shrink-0
+        ${open ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="flex items-center justify-between mb-4 px-2">
+          <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider">Admin Panel</p>
+          <button onClick={onClose} className="md:hidden text-slate-500 dark:text-slate-400">
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
         <nav className="space-y-1">
           {adminLinks.map(link => (
             <Link
               key={link.to}
               to={link.to}
+              onClick={onClose}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 location.pathname === link.to
                   ? 'bg-primary-container text-white'
@@ -33,12 +47,15 @@ function AdminSidebar() {
             </Link>
           ))}
         </nav>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }
 
 function ChatLogs() {
+  const { dark, setDark } = useTheme()
+  const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -51,11 +68,60 @@ function ChatLogs() {
   }, [])
 
   return (
-    <div className="bg-surface dark:bg-slate-950 min-h-screen pt-16 flex flex-col">
-      <main className="flex-1 px-4 py-12">
-        <div className="max-w-6xl mx-auto flex gap-8">
+    <div className="bg-surface dark:bg-slate-950 min-h-screen flex flex-col">
 
-          <AdminSidebar />
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 h-16 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+        >
+          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+        </button>
+        <span className="text-sm font-bold text-[#002147] dark:text-slate-50">Admin Panel</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDark(!dark)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+          >
+            <span className="material-symbols-outlined text-[20px]">{dark ? 'light_mode' : 'dark_mode'}</span>
+          </button>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+          >
+            <span className="material-symbols-outlined text-[20px]">menu</span>
+          </button>
+        </div>
+      </div>
+
+      <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <main className="flex-1 px-4 py-8 pt-24">
+        <div className="max-w-6xl mx-auto md:flex gap-8">
+
+          {/* Desktop sidebar */}
+          <div className="hidden md:block w-64 shrink-0">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-4 sticky top-24">
+              <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-4 px-2">Admin Panel</p>
+              <nav className="space-y-1">
+                {adminLinks.map(link => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      location.pathname === link.to
+                        ? 'bg-primary-container text-white'
+                        : 'text-on-surface dark:text-slate-300 hover:bg-surface-container dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">{link.icon}</span>
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-8">

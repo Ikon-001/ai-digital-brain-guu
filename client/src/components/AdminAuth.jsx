@@ -20,7 +20,7 @@ function AdminAuth({ children }) {
   if (authed) return children
 
   return (
-    <div className="bg-surface dark:bg-slate-950 min-h-screen pt-16 flex items-center justify-center px-4">
+    <div className="bg-surface dark:bg-slate-950 min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
         <div className="text-center mb-10">
