@@ -18,11 +18,12 @@ app.get('/', (req, res) => {
   res.json({ message: 'AI Digital Brain GUU — Server is running' });
 });
 
-// Routes (we'll add these as we build)
+// Routes
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/notify', require('./routes/notify'));
 app.use('/api/logs', require('./routes/logs'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/feedback', require('./routes/feedback'));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

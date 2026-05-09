@@ -10,18 +10,20 @@ function Navbar() {
 
   const isAdminPage = location.pathname.startsWith('/admin')
 
-  const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/chat', label: 'AI Assistant' },
-    { to: '/register', label: 'Register' },
-    { to: '/admin/notify', label: 'Admin' },
-  ]
-
   const adminSubLinks = [
     { to: '/admin/notify', label: 'Send Notification', icon: 'campaign' },
     { to: '/admin/chat-logs', label: 'Chat Logs', icon: 'chat_bubble' },
     { to: '/admin/notification-logs', label: 'Notification Logs', icon: 'notifications' },
     { to: '/admin/users', label: 'User Management', icon: 'group' },
+    { to: '/admin/feedback', label: 'Feedback', icon: 'feedback' },
+  ]
+
+  const desktopLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/chat', label: 'AI Assistant' },
+    { to: '/announcements', label: 'Announcements' },
+    { to: '/register', label: 'Register' },
+    { to: '/admin/notify', label: 'Admin' },
   ]
 
   return (
@@ -35,7 +37,7 @@ function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map(link => (
+            {desktopLinks.map(link => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -74,18 +76,15 @@ function Navbar() {
         </div>
       </header>
 
-      {/* Mobile sidebar overlay */}
+      {/* Mobile overlay */}
       {menuOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
-          onClick={() => setMenuOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setMenuOpen(false)} />
       )}
 
       {/* Mobile sidebar drawer */}
       <aside className={`
         fixed top-0 right-0 h-full w-72 z-50 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700
-        transition-transform duration-300 md:hidden
+        transition-transform duration-300 md:hidden overflow-y-auto
         ${menuOpen ? 'translate-x-0' : 'translate-x-full'}
       `}>
         {/* Sidebar header */}
@@ -101,44 +100,47 @@ function Navbar() {
 
         {/* Sidebar links */}
         <nav className="p-4 space-y-1">
-          <Link
-            to="/"
-            onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
-              location.pathname === '/'
-                ? 'bg-[#002147] text-white'
-                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
+
+          <Link to="/" onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === '/' ? 'bg-[#002147] text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
             <span className="material-symbols-outlined text-[20px]">home</span>
             Home
           </Link>
 
-          <Link
-            to="/chat"
-            onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
-              location.pathname === '/chat'
-                ? 'bg-[#002147] text-white'
-                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
+          <Link to="/chat" onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === '/chat' ? 'bg-[#002147] text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
             <span className="material-symbols-outlined text-[20px]">smart_toy</span>
             AI Assistant
           </Link>
 
-          <Link
-            to="/register"
-            onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
-              location.pathname === '/register'
-                ? 'bg-[#002147] text-white'
-                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
+          <Link to="/announcements" onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === '/announcements' ? 'bg-[#002147] text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+            <span className="material-symbols-outlined text-[20px]">campaign</span>
+            Announcements
+          </Link>
+
+          <Link to="/profile" onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === '/profile' ? 'bg-[#002147] text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+            <span className="material-symbols-outlined text-[20px]">person</span>
+            My Profile
+          </Link>
+
+          <Link to="/feedback" onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === '/feedback' ? 'bg-[#002147] text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+            <span className="material-symbols-outlined text-[20px]">feedback</span>
+            Feedback
+          </Link>
+
+          <Link to="/register" onClick={() => setMenuOpen(false)}
+            className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === '/register' ? 'bg-[#002147] text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
             <span className="material-symbols-outlined text-[20px]">person_add</span>
             Register
           </Link>
+
+          {/* Divider */}
+          <div className="pt-2 pb-1">
+            <div className="border-t border-slate-200 dark:border-slate-700" />
+          </div>
 
           {/* Admin with sub-menu */}
           <div>
@@ -154,12 +156,12 @@ function Navbar() {
                 <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
                 Admin
               </div>
-              <span className="material-symbols-outlined text-[18px] transition-transform duration-200" style={{ transform: adminExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+              <span className="material-symbols-outlined text-[18px] transition-transform duration-200"
+                style={{ transform: adminExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                 expand_more
               </span>
             </button>
 
-            {/* Admin sub-links */}
             {adminExpanded && (
               <div className="mt-1 ml-4 pl-3 border-l-2 border-slate-200 dark:border-slate-700 space-y-1">
                 {adminSubLinks.map(link => (

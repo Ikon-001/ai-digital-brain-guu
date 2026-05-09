@@ -9,6 +9,7 @@ const adminLinks = [
   { to: '/admin/chat-logs', label: 'Chat Logs', icon: 'chat_bubble' },
   { to: '/admin/notification-logs', label: 'Notification Logs', icon: 'notifications' },
   { to: '/admin/users', label: 'User Management', icon: 'group' },
+  { to: '/admin/feedback', label: 'Feedback', icon: 'feedback' },
 ]
 
 const departmentOptions = [
@@ -71,6 +72,8 @@ function NotificationForm() {
   const [status, setStatus] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [emergencyLoading, setEmergencyLoading] = useState(false)
+  const [confirmEmergency, setConfirmEmergency] = useState(false)
 
   const addTarget = (value) => {
     if (!value || selectedTargets.includes(value)) return
@@ -104,7 +107,8 @@ function NotificationForm() {
         message,
         targets: selectedTargets,
         logic,
-        sent_by: 'admin@guu.edu.ng'
+        sent_by: 'admin@guu.edu.ng',
+        is_emergency: false
       })
       setStatus(res.data.message)
       setSuccess(true)
@@ -117,6 +121,38 @@ function NotificationForm() {
       setSuccess(false)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const sendEmergency = async () => {
+    if (!title || !message) {
+      setStatus('Please fill in title and message before sending an emergency broadcast.')
+      setSuccess(false)
+      setConfirmEmergency(false)
+      return
+    }
+    setEmergencyLoading(true)
+    setStatus('')
+    setConfirmEmergency(false)
+    try {
+      const res = await axios.post(`${API_URL}/api/notify`, {
+        title,
+        message,
+        targets: ['all'],
+        logic: 'OR',
+        sent_by: 'admin@guu.edu.ng',
+        is_emergency: true
+      })
+      setStatus(`🚨 Emergency broadcast sent to ${res.data.message.match(/\d+/)?.[0] || 'all'} recipients.`)
+      setSuccess(true)
+      setTitle('')
+      setMessage('')
+      setSelectedTargets([])
+    } catch {
+      setStatus('Failed to send emergency broadcast.')
+      setSuccess(false)
+    } finally {
+      setEmergencyLoading(false)
     }
   }
 
@@ -156,6 +192,43 @@ function NotificationForm() {
               <div>
                 <h1 className="text-2xl font-bold text-primary dark:text-slate-50 tracking-tight">Send Notification</h1>
                 <p className="text-xs text-on-surface-variant dark:text-slate-400">Admin Panel — GUU AI Digital Brain</p>
+              </div>
+            </div>
+
+            {/* Emergency broadcast banner */}
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4 mb-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-red-500 text-[20px] shrink-0 mt-0.5">emergency</span>
+                  <div>
+                    <p className="text-sm font-bold text-red-700 dark:text-red-300 mb-1">Emergency Broadcast</p>
+                    <p className="text-xs text-red-600 dark:text-red-400">Fills title and message above then sends instantly to ALL registered members. Use only for urgent campus-wide alerts.</p>
+                  </div>
+                </div>
+                {!confirmEmergency ? (
+                  <button
+                    onClick={() => setConfirmEmergency(true)}
+                    className="shrink-0 px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-700 transition-all active:scale-95"
+                  >
+                    🚨 Broadcast
+                  </button>
+                ) : (
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={sendEmergency}
+                      disabled={emergencyLoading}
+                      className="px-3 py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-700 transition-all disabled:opacity-50"
+                    >
+                      {emergencyLoading ? 'Sending...' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => setConfirmEmergency(false)}
+                      className="px-3 py-2 bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl border border-red-200 dark:border-red-700 hover:bg-red-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

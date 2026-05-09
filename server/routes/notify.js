@@ -5,7 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 router.post('/', async (req, res) => {
-    const { title, message, targets, logic, sent_by } = req.body;
+    const { title, message, targets, logic, sent_by, is_emergency } = req.body;
 
     if (!title || !message || !targets || targets.length === 0) {
         return res.status(400).json({ error: 'Title, message and at least one target are required' });
@@ -14,13 +14,16 @@ router.post('/', async (req, res) => {
     try {
         let emails = [];
 
-        if (logic === 'AND') {
-            // AND logic — user must match ALL targets
+        // Emergency broadcast — send to everyone, skip target logic
+        if (is_emergency) {
+            const { data, error } = await supabase.from('users').select('email');
+            if (error) throw error;
+            emails = data?.map(u => u.email) || [];
+        } else if (logic === 'AND') {
             let query = supabase.from('users').select('email');
 
             for (const target of targets) {
                 if (target === 'all') {
-                    // all overrides AND logic
                     break;
                 } else if (target === 'all_students') {
                     query = query.eq('role', 'student');
@@ -38,7 +41,6 @@ router.post('/', async (req, res) => {
             emails = data?.map(u => u.email) || [];
 
         } else {
-            // OR logic — send to anyone matching ANY target
             let emailSet = new Set();
 
             for (const target of targets) {
@@ -80,7 +82,7 @@ router.post('/', async (req, res) => {
             body: JSON.stringify({
                 personalizations: [{ to: emails.map(email => ({ email })) }],
                 from: { email: process.env.SENDGRID_FROM_EMAIL, name: 'GUU AI Digital Brain' },
-                subject: title,
+                subject: is_emergency ? `🚨 EMERGENCY: ${title}` : title,
                 content: [{ type: 'text/plain', value: message }]
             })
         });
@@ -93,9 +95,11 @@ router.post('/', async (req, res) => {
         await supabase.from('notifications').insert({
             title,
             message,
-            target: `(${logic}) ${targets.join(', ')}`,
+            target: is_emergency ? 'EMERGENCY — All Members' : `(${logic}) ${targets.join(', ')}`,
             sent_by: sent_by || 'admin',
-            status: 'sent'
+            status: 'sent',
+            recipient_count: emails.length,
+            is_emergency: is_emergency || false
         });
 
         res.json({
