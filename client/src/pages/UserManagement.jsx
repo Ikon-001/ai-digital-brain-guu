@@ -9,6 +9,7 @@ const adminLinks = [
   { to: '/admin/chat-logs', label: 'Chat Logs', icon: 'chat_bubble' },
   { to: '/admin/notification-logs', label: 'Notification Logs', icon: 'notifications' },
   { to: '/admin/users', label: 'User Management', icon: 'group' },
+  { to: '/admin/feedback', label: 'Feedback', icon: 'feedback' },
 ]
 
 function UserManagement() {
