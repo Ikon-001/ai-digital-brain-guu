@@ -11,6 +11,8 @@ function Profile() {
   const [notifications, setNotifications] = useState([])
   const [feedback, setFeedback] = useState([])
   const [loading, setLoading] = useState(true)
+  const [dataError, setDataError] = useState('')
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem('guu_user')
@@ -30,11 +32,7 @@ function Profile() {
         axios.get(`${API_URL}/api/logs/notifications`),
         axios.get(`${API_URL}/api/feedback`)
       ])
-
-      const userChats = chatsRes.data.filter(c =>
-        c.user_email?.toLowerCase() === email.toLowerCase()
-      )
-
+      const userChats = chatsRes.data.filter(c => c.user_email?.toLowerCase() === email.toLowerCase())
       const userNotifs = notifsRes.data.filter(n => {
         if (n.is_emergency) return true
         if (n.target?.includes('all')) return true
@@ -42,16 +40,12 @@ function Profile() {
         if (level && n.target?.includes(`level:${level}`)) return true
         return false
       })
-
-      const userFeedback = feedbackRes.data.filter(f =>
-        f.student_email?.toLowerCase() === email.toLowerCase()
-      )
-
+      const userFeedback = feedbackRes.data.filter(f => f.student_email?.toLowerCase() === email.toLowerCase())
       setChats(userChats)
       setNotifications(userNotifs)
       setFeedback(userFeedback)
     } catch {
-      console.error('Failed to load profile data')
+      setDataError('Could not load your profile data. Please refresh the page.')
     } finally {
       setLoading(false)
     }
@@ -76,47 +70,73 @@ function Profile() {
 
   return (
     <div className="bg-surface dark:bg-slate-950 min-h-screen flex flex-col">
+
+      {/* Logout confirmation modal */}
+      {showLogoutModal && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowLogoutModal(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-outline-variant dark:border-slate-700 p-8 shadow-xl w-full max-w-sm">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-red-500 text-2xl">logout</span>
+              </div>
+              <h3 className="text-lg font-bold text-on-surface dark:text-slate-50 text-center mb-2">Log Out?</h3>
+              <p className="text-sm text-on-surface-variant dark:text-slate-400 text-center mb-6">Are you sure you want to log out of your GUU AI Digital Brain account?</p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-outline-variant dark:border-slate-600 text-sm font-semibold text-on-surface dark:text-slate-300 hover:bg-surface-container dark:hover:bg-slate-700 transition-all">
+                  Cancel
+                </button>
+                <button onClick={logout}
+                  className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all">
+                  Log Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       <main className="flex-1 px-4 py-8 pt-24">
         <div className="max-w-3xl mx-auto">
 
+          {dataError && (
+            <div className="p-4 rounded-xl text-sm font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 mb-6">
+              {dataError}
+            </div>
+          )}
+
           {/* Profile header */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl border border-outline-variant dark:border-slate-700 p-6 shadow-sm mb-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center shrink-0">
                   <span className="text-white text-2xl font-bold">{initials}</span>
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-on-surface dark:text-slate-50">{user.name}</h2>
                   <p className="text-sm text-on-surface-variant dark:text-slate-400">{user.email}</p>
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold mt-1 ${
-                    user.role === 'admin'
-                      ? 'bg-primary-container text-white'
-                      : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    user.role === 'admin' ? 'bg-primary-container text-white' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                   }`}>
                     {user.role}
                   </span>
                 </div>
               </div>
-              <button
-                onClick={logout}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all"
-              >
+              <button onClick={() => setShowLogoutModal(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all self-start sm:self-auto">
                 <span className="material-symbols-outlined text-[16px]">logout</span>
                 Logout
               </button>
             </div>
 
-            {/* Stats grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="bg-surface-container-low dark:bg-slate-700 rounded-2xl p-4">
                 <p className="text-xs text-on-surface-variant dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">Department</p>
                 <p className="text-sm font-medium text-on-surface dark:text-slate-100">{user.department}</p>
               </div>
               <div className="bg-surface-container-low dark:bg-slate-700 rounded-2xl p-4">
-                <p className="text-xs text-on-surface-variant dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">
-                  {user.role === 'admin' ? 'Staff Role' : 'Level'}
-                </p>
+                <p className="text-xs text-on-surface-variant dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">{user.role === 'admin' ? 'Staff Role' : 'Level'}</p>
                 <p className="text-sm font-medium text-on-surface dark:text-slate-100">
                   {user.role === 'admin' ? user.staff_role || '—' : user.level ? `${user.level} Level` : '—'}
                 </p>
@@ -202,11 +222,7 @@ function Profile() {
                   <div key={i} className="bg-surface-container-low dark:bg-slate-700 rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-semibold text-on-surface dark:text-slate-100">{f.subject}</p>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        f.status === 'read'
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                          : 'bg-primary-container text-white'
-                      }`}>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${f.status === 'read' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-primary-container text-white'}`}>
                         {f.status}
                       </span>
                     </div>
@@ -219,7 +235,6 @@ function Profile() {
 
         </div>
       </main>
-
       <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
       </footer>

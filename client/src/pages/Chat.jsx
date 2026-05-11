@@ -14,6 +14,7 @@ function Chat() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [inputError, setInputError] = useState('')
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -21,7 +22,12 @@ function Chat() {
   }, [messages])
 
   const sendMessage = async () => {
-    if (!input.trim()) return
+    if (!input.trim()) {
+      setInputError('Please type a message before sending.')
+      setTimeout(() => setInputError(''), 3000)
+      return
+    }
+    setInputError('')
     const userMessage = input
     setMessages(prev => [...prev, { role: 'user', text: userMessage }])
     setInput('')
@@ -101,32 +107,27 @@ function Chat() {
             <div className="flex items-center gap-2">
               <input
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={e => { setInput(e.target.value); setInputError('') }}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage() } }}
                 placeholder="Ask about courses, enrollment, campus life..."
-                className="flex-1 px-5 py-4 bg-white dark:bg-slate-800 border border-outline-variant dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary-container focus:border-primary-container shadow-sm text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 outline-none"
+                className={`flex-1 px-5 py-4 bg-white dark:bg-slate-800 border rounded-2xl focus:ring-2 focus:ring-primary-container focus:border-primary-container shadow-sm text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 outline-none ${inputError ? 'border-red-400 dark:border-red-500' : 'border-outline-variant dark:border-slate-700'}`}
               />
-              <button
-                onClick={sendMessage}
-                className="bg-primary-container text-white w-12 h-12 rounded-xl flex items-center justify-center hover:opacity-90 transition-all active:scale-95 shadow-md shrink-0"
-              >
+              <button onClick={sendMessage}
+                className="bg-primary-container text-white w-12 h-12 rounded-xl flex items-center justify-center hover:opacity-90 transition-all active:scale-95 shadow-md shrink-0">
                 <span className="material-symbols-outlined text-[20px]">send</span>
               </button>
             </div>
+            {inputError && <p className="text-xs text-red-500 mt-1 px-1">{inputError}</p>}
             <div className="flex justify-center mt-3 gap-6">
-              <button
-                onClick={clearChat}
-                className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-primary-container dark:hover:text-blue-400 transition-colors uppercase tracking-wider"
-              >
+              <button onClick={clearChat}
+                className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-primary-container dark:hover:text-blue-400 transition-colors uppercase tracking-wider">
                 <span className="material-symbols-outlined text-sm">restart_alt</span>
                 New Thread
               </button>
             </div>
           </div>
-
         </div>
       </main>
-
       <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
       </footer>

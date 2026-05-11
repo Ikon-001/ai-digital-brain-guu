@@ -7,18 +7,25 @@ const API_URL = import.meta.env.VITE_API_URL
 function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [status, setStatus] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
   const requestPin = async () => {
+    setEmailError('')
+    setStatus('')
+
     if (!email.trim()) {
-      setStatus('Please enter your registered email.')
-      setSuccess(false)
+      setEmailError('Please enter your email address.')
       return
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Please enter a valid email address.')
+      return
+    }
+
     setLoading(true)
-    setStatus('')
     try {
       await axios.post(`${API_URL}/api/users/request-pin`, { email })
       setSuccess(true)
@@ -29,7 +36,7 @@ function Login() {
     } catch (err) {
       setSuccess(false)
       if (err.response?.status === 404) {
-        setStatus('No account found with that email. Please register first.')
+        setEmailError('No account found with that email. Please register first.')
       } else {
         setStatus('Failed to send PIN. Please try again.')
       }
@@ -41,7 +48,6 @@ function Login() {
   return (
     <div className="bg-surface dark:bg-slate-950 min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center mx-auto mb-6">
             <span className="material-symbols-outlined text-white text-3xl">login</span>
@@ -51,17 +57,17 @@ function Login() {
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-3xl border border-outline-variant dark:border-slate-700 p-8 shadow-sm space-y-5">
-
           <div>
             <label className="block text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
             <input
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => { setEmail(e.target.value); setEmailError('') }}
               onKeyDown={e => e.key === 'Enter' && requestPin()}
               placeholder="e.g. student@guu.edu.ng"
-              className="w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border border-outline-variant dark:border-slate-600 rounded-xl text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary-container outline-none transition-all"
+              className={`w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border rounded-xl text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary-container outline-none transition-all ${emailError ? 'border-red-400 dark:border-red-500' : 'border-outline-variant dark:border-slate-600'}`}
             />
+            {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
           </div>
 
           {status && (
@@ -70,20 +76,15 @@ function Login() {
             </div>
           )}
 
-          <button
-            onClick={requestPin}
-            disabled={loading}
-            className="w-full bg-primary-container text-white py-4 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
+          <button onClick={requestPin} disabled={loading}
+            className="w-full bg-primary-container text-white py-4 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             <span className="material-symbols-outlined text-xl">send</span>
             {loading ? 'Sending PIN...' : 'Send My PIN'}
           </button>
 
           <p className="text-center text-xs text-on-surface-variant dark:text-slate-500">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary-container dark:text-blue-400 font-semibold hover:underline">
-              Register here
-            </Link>
+            <Link to="/register" className="text-primary-container dark:text-blue-400 font-semibold hover:underline">Register here</Link>
           </p>
         </div>
 

@@ -8,6 +8,7 @@ function Navbar() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminExpanded, setAdminExpanded] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const storedUser = localStorage.getItem('guu_user')
   const user = storedUser ? JSON.parse(storedUser) : null
@@ -18,6 +19,7 @@ function Navbar() {
   const logout = () => {
     localStorage.removeItem('guu_user')
     setMenuOpen(false)
+    setShowLogoutModal(false)
     navigate('/')
   }
 
@@ -47,6 +49,39 @@ function Navbar() {
 
   return (
     <>
+      {/* Logout confirmation modal */}
+      {showLogoutModal && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setShowLogoutModal(false)} />
+          <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-outline-variant dark:border-slate-700 p-8 shadow-xl w-full max-w-sm">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-red-500 text-2xl">logout</span>
+              </div>
+              <h3 className="text-lg font-bold text-on-surface dark:text-slate-50 text-center mb-2">Log Out?</h3>
+              <p className="text-sm text-on-surface-variant dark:text-slate-400 text-center mb-6">
+                Are you sure you want to log out of your GUU AI Digital Brain account?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-outline-variant dark:border-slate-600 text-sm font-semibold text-on-surface dark:text-slate-300 hover:bg-surface-container dark:hover:bg-slate-700 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={logout}
+                  className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all"
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Main Navbar */}
       <header className="bg-white dark:bg-slate-950 w-full fixed top-0 z-50 border-b border-slate-200 dark:border-slate-800">
         <div className="flex justify-between items-center px-6 h-16">
           <Link to="/" className="text-lg font-bold text-[#002147] dark:text-slate-50 font-sans tracking-tight">
@@ -70,7 +105,7 @@ function Navbar() {
             ))}
             {isLoggedIn && (
               <button
-                onClick={logout}
+                onClick={() => setShowLogoutModal(true)}
                 className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
               >
                 Logout
@@ -99,6 +134,7 @@ function Navbar() {
         <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setMenuOpen(false)} />
       )}
 
+      {/* Mobile sidebar */}
       <aside className={`fixed top-0 right-0 h-full w-72 z-50 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 transition-transform duration-300 md:hidden overflow-y-auto ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-200 dark:border-slate-700">
           <span className="text-sm font-bold text-[#002147] dark:text-slate-50">
@@ -199,7 +235,7 @@ function Navbar() {
                 <div className="border-t border-slate-200 dark:border-slate-700" />
               </div>
               <button
-                onClick={logout}
+                onClick={() => { setMenuOpen(false); setShowLogoutModal(true) }}
                 className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
               >
                 <span className="material-symbols-outlined text-[20px]">logout</span>

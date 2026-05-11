@@ -13,21 +13,40 @@ const subjectOptions = [
 ]
 
 function Feedback() {
-  const [email, setEmail] = useState('')
+  const storedUser = localStorage.getItem('guu_user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+
+  const [email, setEmail] = useState(user?.email || '')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
+  const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  const validate = () => {
+    const newErrors = {}
+    if (!email.trim()) {
+      newErrors.email = 'Please enter your email address.'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email address.'
+    }
+    if (!subject) newErrors.subject = 'Please select a subject.'
+    if (!message.trim()) newErrors.message = 'Please enter your message.'
+    else if (message.trim().length < 10) newErrors.message = 'Message is too short. Please provide more detail.'
+    return newErrors
+  }
+
   const submitFeedback = async () => {
-    if (!email || !subject || !message) {
-      setStatus('Please fill in all fields.')
+    const newErrors = validate()
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
       setSuccess(false)
       return
     }
     setLoading(true)
     setStatus('')
+    setErrors({})
     try {
       await axios.post(`${API_URL}/api/feedback`, {
         student_email: email,
@@ -36,16 +55,18 @@ function Feedback() {
       })
       setStatus('Feedback submitted successfully. Thank you!')
       setSuccess(true)
-      setEmail('')
+      if (!user) setEmail('')
       setSubject('')
       setMessage('')
     } catch {
-      setStatus('Failed to submit feedback. Please try again.')
+      setStatus('Failed to submit feedback. Please check your connection and try again.')
       setSuccess(false)
     } finally {
       setLoading(false)
     }
   }
+
+  const fieldClass = (name) => `w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border rounded-xl text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary-container outline-none transition-all ${errors[name] ? 'border-red-400 dark:border-red-500' : 'border-outline-variant dark:border-slate-600'}`
 
   return (
     <div className="bg-surface dark:bg-slate-950 min-h-screen flex flex-col">
@@ -62,7 +83,6 @@ function Feedback() {
             </div>
           </div>
 
-          {/* Info banner */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mb-6 flex items-start gap-3">
             <span className="material-symbols-outlined text-blue-500 text-[20px] shrink-0 mt-0.5">info</span>
             <p className="text-sm text-blue-700 dark:text-blue-300">
@@ -76,35 +96,37 @@ function Feedback() {
               <label className="block text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-2">Your Email</label>
               <input
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => { setEmail(e.target.value); setErrors({ ...errors, email: '' }) }}
                 placeholder="e.g. student@guu.edu.ng"
-                className="w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border border-outline-variant dark:border-slate-600 rounded-xl text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary-container outline-none transition-all"
+                disabled={!!user}
+                className={fieldClass('email') + (user ? ' opacity-60 cursor-not-allowed' : '')}
               />
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-2">Subject</label>
               <select
                 value={subject}
-                onChange={e => setSubject(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border border-outline-variant dark:border-slate-600 rounded-xl text-sm text-on-surface dark:text-slate-100 focus:ring-2 focus:ring-primary-container outline-none transition-all"
+                onChange={e => { setSubject(e.target.value); setErrors({ ...errors, subject: '' }) }}
+                className={fieldClass('subject')}
               >
                 <option value="" disabled>Select a subject</option>
-                {subjectOptions.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
+                {subjectOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
+              {errors.subject && <p className="text-xs text-red-500 mt-1">{errors.subject}</p>}
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-2">Message</label>
               <textarea
                 value={message}
-                onChange={e => setMessage(e.target.value)}
+                onChange={e => { setMessage(e.target.value); setErrors({ ...errors, message: '' }) }}
                 placeholder="Describe your issue, suggestion, or inquiry in detail..."
                 rows={6}
-                className="w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border border-outline-variant dark:border-slate-600 rounded-xl text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary-container outline-none transition-all resize-vertical"
+                className={fieldClass('message') + ' resize-vertical'}
               />
+              {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}
             </div>
 
             {status && (
@@ -113,18 +135,14 @@ function Feedback() {
               </div>
             )}
 
-            <button
-              onClick={submitFeedback}
-              disabled={loading}
-              className="w-full bg-primary-container text-white py-4 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
+            <button onClick={submitFeedback} disabled={loading}
+              className="w-full bg-primary-container text-white py-4 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
               <span className="material-symbols-outlined text-xl">send</span>
               {loading ? 'Submitting...' : 'Submit Feedback'}
             </button>
           </div>
         </div>
       </main>
-
       <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
       </footer>
