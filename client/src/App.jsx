@@ -12,6 +12,8 @@ import Profile from './pages/Profile'
 import Announcements from './pages/Announcements'
 import Feedback from './pages/Feedback'
 import AdminFeedback from './pages/AdminFeedback'
+import Login from './pages/Login'
+import Verify from './pages/Verify'
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
         <Route path="/admin/notification-logs" element={<AdminAuth><NotificationLogs /></AdminAuth>} />
         <Route path="/admin/users" element={<AdminAuth><UserManagement /></AdminAuth>} />
         <Route path="/admin/feedback" element={<AdminAuth><AdminFeedback /></AdminAuth>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify" element={<Verify />} />
       </Routes>
     </>
   )

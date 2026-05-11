@@ -5,6 +5,10 @@ import ReactMarkdown from 'react-markdown'
 const API_URL = import.meta.env.VITE_API_URL
 
 function Chat() {
+  const storedUser = localStorage.getItem('guu_user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+  const userEmail = user?.email || 'guest@unknown'
+
   const [messages, setMessages] = useState([
     { role: 'ai', text: 'Welcome to the GUU Digital Brain. I am your academic assistant. You can ask me about campus facilities, enrollment procedures, faculty information, and more. How can I help you today?' }
   ])
@@ -26,7 +30,7 @@ function Chat() {
     try {
       const res = await axios.post(`${API_URL}/api/chat`, {
         message: userMessage,
-        user_email: 'student@guu.edu.ng'
+        user_email: userEmail
       })
       setMessages(prev => [...prev, { role: 'ai', text: res.data.response }])
     } catch {
@@ -45,13 +49,18 @@ function Chat() {
       <main className="flex-1 flex flex-col items-center px-4 py-8">
         <div className="w-full max-w-3xl flex flex-col" style={{ height: 'calc(100vh - 64px - 32px)' }}>
 
-          {/* Header */}
           <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold text-primary dark:text-slate-50 tracking-tight">GUU AI Assistant</h1>
             <p className="text-sm text-on-surface-variant dark:text-slate-400 mt-1">Ask anything about Gregory University, Uturu</p>
+            {!user && (
+              <p className="text-xs text-on-surface-variant dark:text-slate-500 mt-1">
+                Chatting as guest —{' '}
+                <a href="/login" className="text-primary-container dark:text-blue-400 font-semibold hover:underline">login</a>
+                {' '}to save your chat history
+              </p>
+            )}
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto space-y-6 pb-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse ml-auto max-w-[85%]' : 'max-w-[85%]'}`}>
@@ -88,7 +97,6 @@ function Chat() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="pt-4 bg-surface dark:bg-slate-950 sticky bottom-0">
             <div className="flex items-center gap-2">
               <input

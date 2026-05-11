@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate, Link } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL
 const ADMIN_TOKEN = 'GUU-ADMIN-TOKEN-2025'
@@ -16,6 +17,7 @@ const staffRoles = [
 ]
 
 function Register() {
+  const navigate = useNavigate()
   const [role, setRole] = useState('student')
   const [form, setForm] = useState({ name: '', email: '', department: '', level: '', staffRole: '', adminToken: '' })
   const [status, setStatus] = useState('')
@@ -49,7 +51,7 @@ function Register() {
     setLoading(true)
     setStatus('')
     try {
-      const res = await axios.post(`${API_URL}/api/users/register`, {
+      await axios.post(`${API_URL}/api/users/register`, {
         name: form.name,
         email: form.email,
         department: form.department,
@@ -57,11 +59,19 @@ function Register() {
         staff_role: role === 'admin' ? form.staffRole : null,
         role: role
       })
-      setStatus(res.data.message)
+      // after successful registration, request a PIN
+      await axios.post(`${API_URL}/api/users/request-pin`, { email: form.email })
       setSuccess(true)
-      setForm({ name: '', email: '', department: '', level: '', staffRole: '', adminToken: '' })
-    } catch {
-      setStatus('Registration failed. Please try again.')
+      setStatus('Account created! A PIN has been sent to your email.')
+      setTimeout(() => {
+        navigate(`/verify?email=${encodeURIComponent(form.email)}&mode=register`)
+      }, 1500)
+    } catch (err) {
+      if (err.response?.data?.error?.includes('duplicate') || err.response?.data?.error?.includes('already')) {
+        setStatus('An account with this email already exists. Please login instead.')
+      } else {
+        setStatus('Registration failed. Please try again.')
+      }
       setSuccess(false)
     } finally {
       setLoading(false)
@@ -130,7 +140,6 @@ function Register() {
                   className="w-full px-4 py-3 bg-surface-container-low dark:bg-slate-700 border border-outline-variant dark:border-slate-600 rounded-xl text-sm text-on-surface dark:text-slate-100 focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all"
                 >
                   <option value="">Select your department</option>
-
                   {role === 'admin' && (
                     <>
                       <option value="Administration">Administration</option>
@@ -140,11 +149,9 @@ function Register() {
                       <option value="Library">Library</option>
                     </>
                   )}
-
                   <optgroup label="College of Agriculture">
                     <option value="Agriculture">Agriculture</option>
                   </optgroup>
-
                   <optgroup label="College of Education">
                     <option value="Education Biology">Education Biology</option>
                     <option value="Education Chemistry">Education Chemistry</option>
@@ -152,42 +159,35 @@ function Register() {
                     <option value="Education Mathematics">Education Mathematics</option>
                     <option value="Education Physics">Education Physics</option>
                   </optgroup>
-
                   <optgroup label="College of Engineering">
                     <option value="Civil Engineering">Civil Engineering</option>
                     <option value="Computer Engineering">Computer Engineering</option>
                     <option value="Electrical Engineering">Electrical Engineering</option>
                     <option value="Mechanical Engineering">Mechanical Engineering</option>
                   </optgroup>
-
                   <optgroup label="College of Environmental Sciences">
                     <option value="Environmental Science">Environmental Science</option>
                   </optgroup>
-
                   <optgroup label="College of Humanities">
                     <option value="History and International Studies">History and International Studies</option>
                     <option value="Languages and Literary Studies">Languages and Literary Studies</option>
                     <option value="Theatre and Media Studies">Theatre and Media Studies</option>
                   </optgroup>
-
                   <optgroup label="College of Law">
                     <option value="Law">Law</option>
                   </optgroup>
-
                   <optgroup label="College of Medical and Health Sciences">
                     <option value="Medicine and Surgery">Medicine and Surgery</option>
                     <option value="Nursing Science">Nursing Science</option>
                     <option value="Pharmacy">Pharmacy</option>
                     <option value="Physiotherapy">Physiotherapy</option>
                   </optgroup>
-
                   <optgroup label="College of Natural and Applied Sciences">
                     <option value="Biochemistry">Biochemistry</option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Mathematics and Statistics">Mathematics and Statistics</option>
                     <option value="Microbiology">Microbiology</option>
                   </optgroup>
-
                   <optgroup label="Joseph Bokai School of Social and Managerial Sciences">
                     <option value="Accounting">Accounting</option>
                     <option value="Business Administration">Business Administration</option>
@@ -268,16 +268,17 @@ function Register() {
                 disabled={loading}
                 className="w-full bg-primary-container text-white py-4 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Registering...' : `Create ${role === 'admin' ? 'Admin' : 'Student'} Account`}
+                {loading ? 'Creating Account...' : `Create ${role === 'admin' ? 'Admin' : 'Student'} Account`}
               </button>
+
+              <p className="text-center text-xs text-on-surface-variant dark:text-slate-500">
+                Already have an account?{' '}
+                <Link to="/login" className="text-primary-container dark:text-blue-400 font-semibold hover:underline">
+                  Login here
+                </Link>
+              </p>
             </div>
           </div>
-
-          <p className="text-center text-xs text-on-surface-variant dark:text-slate-500 mt-6">
-            Already registered? Use the{' '}
-            <a href="/chat" className="text-secondary dark:text-blue-400 font-semibold hover:underline">AI Chat</a>
-            {' '}to ask questions.
-          </p>
         </div>
       </main>
 

@@ -12,6 +12,30 @@ const adminLinks = [
   { to: '/admin/feedback', label: 'Feedback', icon: 'feedback' },
 ]
 
+function AdminInfo({ item }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 text-xs text-on-surface-variant dark:text-slate-500 hover:text-primary-container dark:hover:text-blue-400 transition-colors font-semibold"
+      >
+        <span className="material-symbols-outlined text-[14px]">{open ? 'expand_less' : 'expand_more'}</span>
+        {open ? 'Hide sender info' : 'View sender info'}
+      </button>
+      {open && (
+        <div className="mt-2 p-3 bg-surface-container-low dark:bg-slate-700 rounded-xl text-xs text-on-surface-variant dark:text-slate-400">
+          <p><span className="font-semibold">Sent by:</span> {item.sent_by}</p>
+          <p className="mt-1"><span className="font-semibold">Target:</span> {item.target}</p>
+          {item.recipient_count > 0 && (
+            <p className="mt-1"><span className="font-semibold">Recipients:</span> {item.recipient_count}</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function NotificationLogs() {
   const location = useLocation()
   const [logs, setLogs] = useState([])
@@ -80,20 +104,25 @@ function NotificationLogs() {
 
             <div className="space-y-4">
               {logs.map((log, i) => (
-                <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-6 shadow-sm">
+                <div key={i} className={`bg-white dark:bg-slate-800 rounded-2xl border shadow-sm p-6 ${log.is_emergency ? 'border-red-300 dark:border-red-700' : 'border-outline-variant dark:border-slate-700'}`}>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container dark:bg-slate-700 rounded-full text-xs font-semibold text-on-surface-variant dark:text-slate-300">
-                      <span className="material-symbols-outlined text-[14px]">group</span>
-                      {log.target}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {log.is_emergency && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full">
+                          <span className="material-symbols-outlined text-[10px]">emergency</span>
+                          EMERGENCY
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container dark:bg-slate-700 rounded-full text-xs font-semibold text-on-surface-variant dark:text-slate-300">
+                        <span className="material-symbols-outlined text-[14px]">group</span>
+                        {log.recipient_count > 0 ? `${log.recipient_count} recipients` : log.target}
+                      </span>
+                    </div>
                     <span className="text-xs text-on-surface-variant dark:text-slate-500">{new Date(log.created_at).toLocaleString()}</span>
                   </div>
                   <h3 className="font-semibold text-primary dark:text-slate-100 mb-2">{log.title}</h3>
-                  <p className="text-sm text-on-surface-variant dark:text-slate-400 mb-4">{log.message}</p>
-                  <div className="flex items-center gap-1.5 text-xs text-on-surface-variant dark:text-slate-500">
-                    <span className="material-symbols-outlined text-[14px]">person</span>
-                    Sent by {log.sent_by}
-                  </div>
+                  <p className="text-sm text-on-surface-variant dark:text-slate-400 mb-2">{log.message}</p>
+                  <AdminInfo item={log} />
                 </div>
               ))}
             </div>
