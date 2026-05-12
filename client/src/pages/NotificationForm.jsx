@@ -65,6 +65,11 @@ const audienceOptions = [
 
 function NotificationForm() {
   const location = useLocation()
+
+  const storedUser = localStorage.getItem('guu_user')
+  const adminUser = storedUser ? JSON.parse(storedUser) : null
+  const sentBy = adminUser ? `${adminUser.name} <${adminUser.email}>` : 'Admin'
+
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
   const [selectedTargets, setSelectedTargets] = useState([])
@@ -90,7 +95,7 @@ function NotificationForm() {
 
   const sendNotification = async () => {
     if (!title || !message) {
-      setStatus('Please fill in title and message.')
+      setStatus('Please fill in the notification title and message.')
       setSuccess(false)
       return
     }
@@ -107,7 +112,7 @@ function NotificationForm() {
         message,
         targets: selectedTargets,
         logic,
-        sent_by: 'admin@guu.edu.ng',
+        sent_by: sentBy,
         is_emergency: false
       })
       setStatus(res.data.message)
@@ -117,7 +122,7 @@ function NotificationForm() {
       setSelectedTargets([])
       setLogic('OR')
     } catch {
-      setStatus('Failed to send notification.')
+      setStatus('Failed to send notification. Please check your connection and try again.')
       setSuccess(false)
     } finally {
       setLoading(false)
@@ -126,7 +131,7 @@ function NotificationForm() {
 
   const sendEmergency = async () => {
     if (!title || !message) {
-      setStatus('Please fill in title and message before sending an emergency broadcast.')
+      setStatus('Please fill in the title and message before sending an emergency broadcast.')
       setSuccess(false)
       setConfirmEmergency(false)
       return
@@ -140,7 +145,7 @@ function NotificationForm() {
         message,
         targets: ['all'],
         logic: 'OR',
-        sent_by: 'admin@guu.edu.ng',
+        sent_by: sentBy,
         is_emergency: true
       })
       setStatus(`🚨 Emergency broadcast sent to ${res.data.message.match(/\d+/)?.[0] || 'all'} recipients.`)
@@ -149,7 +154,7 @@ function NotificationForm() {
       setMessage('')
       setSelectedTargets([])
     } catch {
-      setStatus('Failed to send emergency broadcast.')
+      setStatus('Failed to send emergency broadcast. Please try again.')
       setSuccess(false)
     } finally {
       setEmergencyLoading(false)
@@ -191,7 +196,9 @@ function NotificationForm() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary dark:text-slate-50 tracking-tight">Send Notification</h1>
-                <p className="text-xs text-on-surface-variant dark:text-slate-400">Admin Panel — GUU AI Digital Brain</p>
+                <p className="text-xs text-on-surface-variant dark:text-slate-400">
+                  Sending as <span className="font-semibold">{adminUser?.name || 'Admin'}</span>
+                </p>
               </div>
             </div>
 
@@ -202,7 +209,7 @@ function NotificationForm() {
                   <span className="material-symbols-outlined text-red-500 text-[20px] shrink-0 mt-0.5">emergency</span>
                   <div>
                     <p className="text-sm font-bold text-red-700 dark:text-red-300 mb-1">Emergency Broadcast</p>
-                    <p className="text-xs text-red-600 dark:text-red-400">Fills title and message above then sends instantly to ALL registered members. Use only for urgent campus-wide alerts.</p>
+                    <p className="text-xs text-red-600 dark:text-red-400">Fill in title and message above then send instantly to ALL registered members. Use only for urgent campus-wide alerts.</p>
                   </div>
                 </div>
                 {!confirmEmergency ? (
