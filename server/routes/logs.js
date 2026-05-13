@@ -36,6 +36,42 @@ router.get('/notifications', async (req, res) => {
     }
 });
 
+// Soft delete a notification
+router.patch('/notifications/:id/delete', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const { error } = await supabase
+            .from('notifications')
+            .update({ is_deleted: true })
+            .eq('id', id);
+
+        if (error) throw error;
+        res.json({ success: true, message: 'Notification deleted successfully.' });
+    } catch (error) {
+        console.error('Delete error:', error);
+        res.status(500).json({ error: 'Failed to delete notification. Please try again.' });
+    }
+});
+
+// Restore a soft deleted notification
+router.patch('/notifications/:id/restore', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const { error } = await supabase
+            .from('notifications')
+            .update({ is_deleted: false })
+            .eq('id', id);
+
+        if (error) throw error;
+        res.json({ success: true, message: 'Notification restored successfully.' });
+    } catch (error) {
+        console.error('Restore error:', error);
+        res.status(500).json({ error: 'Failed to restore notification. Please try again.' });
+    }
+});
+
 // Get all users
 router.get('/users', async (req, res) => {
     try {

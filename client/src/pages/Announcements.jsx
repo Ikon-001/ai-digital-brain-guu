@@ -4,6 +4,27 @@ import { useNavigate } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL
 
+function AdminInfo({ item }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 text-xs text-on-surface-variant dark:text-slate-500 hover:text-primary-container dark:hover:text-blue-400 transition-colors font-semibold"
+      >
+        <span className="material-symbols-outlined text-[14px]">{open ? 'expand_less' : 'expand_more'}</span>
+        {open ? 'Hide sender info' : 'View sender info'}
+      </button>
+      {open && (
+        <div className="mt-2 p-3 bg-surface-container-low dark:bg-slate-700 rounded-xl text-xs text-on-surface-variant dark:text-slate-400">
+          <p><span className="font-semibold">Sent by:</span> {item.sent_by}</p>
+          <p className="mt-1"><span className="font-semibold">Target:</span> {item.target}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Announcements() {
   const navigate = useNavigate()
   const storedUser = localStorage.getItem('guu_user')
@@ -22,8 +43,8 @@ function Announcements() {
     axios.get(`${API_URL}/api/logs/notifications`)
       .then(res => {
         const all = res.data
-        // filter by user's dept and level, plus emergencies and all-member notices
         const relevant = all.filter(n => {
+          if (n.is_deleted) return false
           if (n.is_emergency) return true
           if (n.target?.includes('all')) return true
           if (user.department && n.target?.includes(user.department)) return true
@@ -125,14 +146,12 @@ function Announcements() {
                   <span className="text-xs text-on-surface-variant dark:text-slate-500 shrink-0">{new Date(item.created_at).toLocaleDateString()}</span>
                 </div>
                 <p className="text-sm text-on-surface-variant dark:text-slate-400 mb-4 leading-relaxed">{item.message}</p>
-                <div className="flex items-center justify-between">
-                  {item.recipient_count > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-on-surface-variant dark:text-slate-500">
-                      <span className="material-symbols-outlined text-[14px]">group</span>
-                      {item.recipient_count} recipients
-                    </div>
-                  )}
-                </div>
+                {item.recipient_count > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs text-on-surface-variant dark:text-slate-500 mb-2">
+                    <span className="material-symbols-outlined text-[14px]">group</span>
+                    {item.recipient_count} recipients
+                  </div>
+                )}
                 <AdminInfo item={item} />
               </div>
             ))}
@@ -144,27 +163,6 @@ function Announcements() {
       <footer className="w-full py-6 px-8 flex justify-center bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <p className="text-xs text-slate-500">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
       </footer>
-    </div>
-  )
-}
-
-function AdminInfo({ item }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="mt-3">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-xs text-on-surface-variant dark:text-slate-500 hover:text-primary-container dark:hover:text-blue-400 transition-colors font-semibold"
-      >
-        <span className="material-symbols-outlined text-[14px]">{open ? 'expand_less' : 'expand_more'}</span>
-        {open ? 'Hide sender info' : 'View sender info'}
-      </button>
-      {open && (
-        <div className="mt-2 p-3 bg-surface-container-low dark:bg-slate-700 rounded-xl text-xs text-on-surface-variant dark:text-slate-400">
-          <p><span className="font-semibold">Sent by:</span> {item.sent_by}</p>
-          <p className="mt-1"><span className="font-semibold">Target:</span> {item.target}</p>
-        </div>
-      )}
     </div>
   )
 }
