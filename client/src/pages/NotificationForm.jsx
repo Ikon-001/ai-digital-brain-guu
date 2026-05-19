@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -63,6 +63,21 @@ const audienceOptions = [
   { value: 'all', label: 'All Members' },
 ]
 
+function StatCard({ icon, label, value, sub, color }) {
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-4 shadow-sm flex items-center gap-4">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
+        <span className="material-symbols-outlined text-white text-[20px]">{icon}</span>
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-on-surface dark:text-slate-50">{value}</p>
+        <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400">{label}</p>
+        {sub && <p className="text-xs text-on-surface-variant dark:text-slate-500 mt-0.5">{sub}</p>}
+      </div>
+    </div>
+  )
+}
+
 function NotificationForm() {
   const location = useLocation()
 
@@ -79,6 +94,36 @@ function NotificationForm() {
   const [success, setSuccess] = useState(false)
   const [emergencyLoading, setEmergencyLoading] = useState(false)
   const [confirmEmergency, setConfirmEmergency] = useState(false)
+
+  const [stats, setStats] = useState(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [usersRes, notifsRes, feedbackRes] = await Promise.all([
+          axios.get(`${API_URL}/api/logs/users`),
+          axios.get(`${API_URL}/api/logs/notifications`),
+          axios.get(`${API_URL}/api/feedback`)
+        ])
+        const users = usersRes.data
+        const students = users.filter(u => u.role === 'student').length
+        const staff = users.filter(u => u.role === 'admin').length
+        setStats({
+          total: users.length,
+          students,
+          staff,
+          notifications: notifsRes.data.length,
+          feedback: feedbackRes.data.length
+        })
+      } catch {
+        // fail silently — stats are supplementary
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
 
   const addTarget = (value) => {
     if (!value || selectedTargets.includes(value)) return
@@ -121,6 +166,7 @@ function NotificationForm() {
       setMessage('')
       setSelectedTargets([])
       setLogic('OR')
+      setStats(prev => prev ? { ...prev, notifications: prev.notifications + 1 } : prev)
     } catch {
       setStatus('Failed to send notification. Please check your connection and try again.')
       setSuccess(false)
@@ -153,6 +199,7 @@ function NotificationForm() {
       setTitle('')
       setMessage('')
       setSelectedTargets([])
+      setStats(prev => prev ? { ...prev, notifications: prev.notifications + 1 } : prev)
     } catch {
       setStatus('Failed to send emergency broadcast. Please try again.')
       setSuccess(false)
@@ -190,6 +237,47 @@ function NotificationForm() {
           </div>
 
           <div className="flex-1 min-w-0">
+
+            {/* Dashboard stats */}
+            <div className="mb-8">
+              <p className="text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-3">Platform Overview</p>
+              {statsLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-4 h-20 animate-pulse" />
+                  ))}
+                </div>
+              ) : stats ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatCard
+                    icon="group"
+                    label="Total Users"
+                    value={stats.total}
+                    color="bg-primary-container"
+                  />
+                  <StatCard
+                    icon="school"
+                    label="Students"
+                    value={stats.students}
+                    sub={`${stats.staff} staff`}
+                    color="bg-secondary"
+                  />
+                  <StatCard
+                    icon="campaign"
+                    label="Notifications Sent"
+                    value={stats.notifications}
+                    color="bg-[#175ead]"
+                  />
+                  <StatCard
+                    icon="feedback"
+                    label="Feedback Received"
+                    value={stats.feedback}
+                    color="bg-green-600"
+                  />
+                </div>
+              ) : null}
+            </div>
+
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center">
                 <span className="material-symbols-outlined text-white text-xl">campaign</span>
