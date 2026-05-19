@@ -34,6 +34,7 @@ function Announcements() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     if (!user) {
@@ -58,8 +59,23 @@ function Announcements() {
   }, [])
 
   const emergency = announcements.filter(a => a.is_emergency)
-  const regular = announcements.filter(a => !a.is_emergency)
-  const filtered = filter === 'emergency' ? emergency : filter === 'regular' ? regular : announcements
+
+  const applyFilters = (list) => {
+    let result = list
+    if (filter === 'emergency') result = result.filter(a => a.is_emergency)
+    else if (filter === 'regular') result = result.filter(a => !a.is_emergency)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(a =>
+        a.title?.toLowerCase().includes(q) ||
+        a.message?.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }
+
+  const filtered = applyFilters(announcements)
+  const displayList = filter === 'all' ? filtered.filter(a => !a.is_emergency) : filtered
 
   return (
     <div className="bg-surface dark:bg-slate-950 min-h-screen flex flex-col">
@@ -78,8 +94,27 @@ function Announcements() {
             </div>
           </div>
 
-          {/* Emergency pinned */}
-          {emergency.length > 0 && (
+          {/* Search bar */}
+          <div className="relative mb-6">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-slate-400 text-[20px]">search</span>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search announcements by title or keyword..."
+              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-outline-variant dark:border-slate-700 rounded-2xl text-sm text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all shadow-sm"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-slate-200 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            )}
+          </div>
+
+          {/* Emergency pinned — hidden when searching */}
+          {emergency.length > 0 && !search && (
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="material-symbols-outlined text-red-500 text-[20px]">emergency</span>
@@ -128,18 +163,27 @@ function Announcements() {
             ))}
           </div>
 
+          {/* Search results info */}
+          {search.trim() && !loading && (
+            <p className="text-xs text-on-surface-variant dark:text-slate-400 mb-4">
+              {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "<span className="font-semibold">{search}</span>"
+            </p>
+          )}
+
           {loading && (
             <div className="text-center py-16 text-on-surface-variant dark:text-slate-400 text-sm">Loading announcements...</div>
           )}
           {error && (
             <div className="p-4 rounded-xl text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">{error}</div>
           )}
-          {!loading && !error && filtered.length === 0 && (
-            <div className="text-center py-16 text-on-surface-variant dark:text-slate-400 text-sm">No announcements yet.</div>
+          {!loading && !error && displayList.length === 0 && (
+            <div className="text-center py-16 text-on-surface-variant dark:text-slate-400 text-sm">
+              {search.trim() ? `No announcements found for "${search}"` : 'No announcements yet.'}
+            </div>
           )}
 
           <div className="space-y-4">
-            {filtered.filter(a => filter === 'all' ? !a.is_emergency : true).map((item, i) => (
+            {displayList.map((item, i) => (
               <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl border border-outline-variant dark:border-slate-700 p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <h3 className="font-semibold text-on-surface dark:text-slate-100">{item.title}</h3>
