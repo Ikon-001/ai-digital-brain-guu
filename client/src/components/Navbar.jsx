@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+
+const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours in ms
 
 function Navbar() {
   const { dark, setDark } = useTheme()
@@ -10,14 +12,27 @@ function Navbar() {
   const [adminExpanded, setAdminExpanded] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
+  // check session expiry on every render
+  const loginTime = localStorage.getItem('guu_login_time')
+  const sessionExpired = loginTime && Date.now() - parseInt(loginTime) > SESSION_DURATION
+
+  useEffect(() => {
+    if (sessionExpired) {
+      localStorage.removeItem('guu_user')
+      localStorage.removeItem('guu_login_time')
+      navigate('/login')
+    }
+  }, [location.pathname])
+
   const storedUser = localStorage.getItem('guu_user')
-  const user = storedUser ? JSON.parse(storedUser) : null
+  const user = storedUser && !sessionExpired ? JSON.parse(storedUser) : null
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'admin'
   const isAdminPage = location.pathname.startsWith('/admin')
 
   const logout = () => {
     localStorage.removeItem('guu_user')
+    localStorage.removeItem('guu_login_time')
     setMenuOpen(false)
     setShowLogoutModal(false)
     navigate('/')
@@ -88,7 +103,6 @@ function Navbar() {
             GUU AI Digital Brain
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
             {desktopLinks.map(link => (
               <Link
@@ -134,7 +148,6 @@ function Navbar() {
         <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setMenuOpen(false)} />
       )}
 
-      {/* Mobile sidebar */}
       <aside className={`fixed top-0 right-0 h-full w-72 z-50 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 transition-transform duration-300 md:hidden overflow-y-auto ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-200 dark:border-slate-700">
           <span className="text-sm font-bold text-[#002147] dark:text-slate-50">

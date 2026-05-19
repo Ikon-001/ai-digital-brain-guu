@@ -50,7 +50,7 @@ function Verify() {
   const verifyPin = async () => {
     const fullPin = pin.join('')
     if (fullPin.length < 4) {
-      setStatus('Please enter the full 4-digit PIN.')
+      setStatus('Please enter the complete 4-digit PIN.')
       setSuccess(false)
       return
     }
@@ -59,7 +59,9 @@ function Verify() {
     try {
       const res = await axios.post(`${API_URL}/api/users/verify-pin`, { email, pin: fullPin })
       const user = res.data.user
+      // save user + login timestamp for session expiry
       localStorage.setItem('guu_user', JSON.stringify(user))
+      localStorage.setItem('guu_login_time', Date.now().toString())
       setSuccess(true)
       setStatus(`Welcome, ${user.name}! Redirecting...`)
       setTimeout(() => {
@@ -100,15 +102,12 @@ function Verify() {
             <span className="material-symbols-outlined text-white text-3xl">pin</span>
           </div>
           <h1 className="text-3xl font-bold text-primary dark:text-slate-50 tracking-tight mb-2">Check Your Email</h1>
-          <p className="text-on-surface-variant dark:text-slate-400 text-sm">
-            We sent a 4-digit PIN to
-          </p>
+          <p className="text-on-surface-variant dark:text-slate-400 text-sm">We sent a 4-digit PIN to</p>
           <p className="text-primary-container dark:text-blue-400 font-semibold text-sm mt-1">{email}</p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-3xl border border-outline-variant dark:border-slate-700 p-8 shadow-sm space-y-6">
 
-          {/* PIN inputs */}
           <div>
             <label className="block text-xs font-semibold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-4 text-center">Enter Your PIN</label>
             <div className="flex justify-center gap-3" onPaste={handlePaste}>
