@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import guuLogo from '../assets/guu-logo.jpeg'
 
-const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours in ms
+const SESSION_DURATION = 24 * 60 * 60 * 1000
 
 function Navbar() {
   const { dark, setDark } = useTheme()
@@ -12,7 +13,6 @@ function Navbar() {
   const [adminExpanded, setAdminExpanded] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
-  // check session expiry on every render
   const loginTime = localStorage.getItem('guu_login_time')
   const sessionExpired = loginTime && Date.now() - parseInt(loginTime) > SESSION_DURATION
 
@@ -64,7 +64,6 @@ function Navbar() {
 
   return (
     <>
-      {/* Logout confirmation modal */}
       {showLogoutModal && (
         <>
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setShowLogoutModal(false)} />
@@ -96,11 +95,19 @@ function Navbar() {
         </>
       )}
 
-      {/* Main Navbar */}
       <header className="bg-white dark:bg-slate-950 w-full fixed top-0 z-50 border-b border-slate-200 dark:border-slate-800">
         <div className="flex justify-between items-center px-6 h-16">
-          <Link to="/" className="text-lg font-bold text-[#002147] dark:text-slate-50 font-sans tracking-tight">
-            GUU AI Digital Brain
+
+          {/* UPDATED: logo + name */}
+          <Link to="/" className="flex items-center gap-2.5">
+            <img
+              src={guuLogo}
+              alt="GUU Logo"
+              className="h-8 w-8 object-contain rounded-full bg-white p-0.5 ring-1 ring-slate-200 dark:ring-slate-700"
+            />
+            <span className="text-lg font-bold text-[#002147] dark:text-slate-50 font-sans tracking-tight">
+              GUU AI Digital Brain
+            </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -149,10 +156,19 @@ function Navbar() {
       )}
 
       <aside className={`fixed top-0 right-0 h-full w-72 z-50 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 transition-transform duration-300 md:hidden overflow-y-auto ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        
+        {/* UPDATED: logo + greeting in mobile sidebar */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-200 dark:border-slate-700">
-          <span className="text-sm font-bold text-[#002147] dark:text-slate-50">
-            {isLoggedIn ? `Hi, ${user?.name?.split(' ')[0]}` : 'Menu'}
-          </span>
+          <div className="flex items-center gap-2">
+            <img
+              src={guuLogo}
+              alt="GUU Logo"
+              className="h-7 w-7 object-contain rounded-full bg-white p-0.5 ring-1 ring-slate-200 dark:ring-slate-700"
+            />
+            <span className="text-sm font-bold text-[#002147] dark:text-slate-50">
+              {isLoggedIn ? `Hi, ${user?.name?.split(' ')[0]}` : 'Menu'}
+            </span>
+          </div>
           <button onClick={() => setMenuOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>

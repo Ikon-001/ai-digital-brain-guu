@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
+import guuLogo from '../assets/guu-logo.jpeg'
 
 const API_URL = import.meta.env.VITE_API_URL
 const ADMIN_TOKEN = 'GUU-ADMIN-TOKEN-2025'
@@ -92,6 +93,10 @@ function Register() {
         <div className="w-full max-w-lg">
 
           <div className="text-center mb-10">
+            {/* ADDED: GUU Logo */}
+            <div className="flex justify-center mb-4">
+              <img src={guuLogo} alt="GUU Logo" className="h-16 w-16 object-contain rounded-full bg-white p-1 ring-1 ring-slate-200 dark:ring-slate-700" />
+            </div>
             <div className="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center mx-auto mb-6">
               <span className="material-symbols-outlined text-white text-3xl">school</span>
             </div>

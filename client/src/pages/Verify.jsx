@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import axios from 'axios'
+import guuLogo from '../assets/guu-logo.jpeg'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -59,7 +60,6 @@ function Verify() {
     try {
       const res = await axios.post(`${API_URL}/api/users/verify-pin`, { email, pin: fullPin })
       const user = res.data.user
-      // save user + login timestamp for session expiry
       localStorage.setItem('guu_user', JSON.stringify(user))
       localStorage.setItem('guu_login_time', Date.now().toString())
       setSuccess(true)
@@ -98,6 +98,10 @@ function Verify() {
       <div className="w-full max-w-md">
 
         <div className="text-center mb-10">
+          {/* ADDED: GUU Logo */}
+          <div className="flex justify-center mb-4">
+            <img src={guuLogo} alt="GUU Logo" className="h-16 w-16 object-contain rounded-full bg-white p-1 ring-1 ring-slate-200 dark:ring-slate-700" />
+          </div>
           <div className="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center mx-auto mb-6">
             <span className="material-symbols-outlined text-white text-3xl">pin</span>
           </div>

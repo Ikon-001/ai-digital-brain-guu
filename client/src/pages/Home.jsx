@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import guuLogo from '../assets/guu-logo.jpeg'
 
 function Home() {
   return (
@@ -8,9 +9,13 @@ function Home() {
       <section className="relative bg-surface dark:bg-slate-950 overflow-hidden py-24 md:py-32">
         <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-2 items-center gap-16">
           <div>
-            <span className="inline-block bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase mb-6">
-              Intellectual Rigor • Digital Efficiency
-            </span>
+            {/* ADDED: GUU Logo above badge */}
+            <div className="flex items-center gap-3 mb-6">
+              <img src={guuLogo} alt="GUU Logo" className="h-12 w-12 object-contain rounded-full bg-white p-1 ring-1 ring-slate-200 dark:ring-slate-700" />
+              <span className="inline-block bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase">
+                Intellectual Rigor • Digital Efficiency
+              </span>
+            </div>
             <h1 className="text-5xl font-bold text-primary dark:text-slate-50 mb-6 leading-tight tracking-tight">
               Your University's Intellectual Ecosystem,{' '}
               <span className="text-secondary dark:text-blue-400">AI-Powered.</span>
@@ -67,7 +72,6 @@ function Home() {
           </div>
 
           <div className="grid grid-cols-12 gap-6">
-            {/* AI Assistance */}
             <div className="col-span-12 md:col-span-8 bg-surface-container-low dark:bg-slate-800 p-10 rounded-3xl border border-outline-variant dark:border-slate-700 relative overflow-hidden group">
               <div className="w-12 h-12 bg-primary-container text-white rounded-xl flex items-center justify-center mb-6">
                 <span className="material-symbols-outlined">auto_awesome</span>
@@ -78,7 +82,6 @@ function Home() {
               </p>
             </div>
 
-            {/* Notifications */}
             <div className="col-span-12 md:col-span-4 bg-primary-container p-10 rounded-3xl text-white flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
@@ -94,7 +97,6 @@ function Home() {
               </div>
             </div>
 
-            {/* Info Hub */}
             <div className="col-span-12 md:col-span-4 bg-surface-container dark:bg-slate-800 p-8 rounded-3xl border border-outline-variant dark:border-slate-700">
               <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center mb-6 text-white">
                 <span className="material-symbols-outlined">hub</span>
@@ -105,7 +107,6 @@ function Home() {
               </p>
             </div>
 
-            {/* Communication */}
             <div className="col-span-12 md:col-span-4 bg-white dark:bg-slate-800 p-8 rounded-3xl border-l-4 border-l-tertiary-container shadow-sm">
               <div className="w-10 h-10 bg-tertiary-fixed rounded-lg flex items-center justify-center mb-6">
                 <span className="material-symbols-outlined text-on-tertiary-fixed-variant">forum</span>
@@ -116,7 +117,6 @@ function Home() {
               </p>
             </div>
 
-            {/* Integration */}
             <div className="col-span-12 md:col-span-4 bg-surface dark:bg-slate-800 p-8 rounded-3xl border border-outline-variant dark:border-slate-700 flex items-center gap-6">
               <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-2xl shadow-sm flex items-center justify-center flex-shrink-0">
                 <span className="material-symbols-outlined text-secondary text-3xl">api</span>
@@ -173,9 +173,13 @@ function Home() {
 
       {/* Footer */}
       <footer className="w-full py-8 px-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <div>
-          <div className="font-bold text-primary dark:text-slate-100">GUU AI Digital Brain</div>
-          <p className="text-xs text-slate-500 mt-1">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
+        <div className="flex items-center gap-2">
+          {/* ADDED: logo in footer */}
+          <img src={guuLogo} alt="GUU Logo" className="h-7 w-7 object-contain rounded-full bg-white p-0.5 ring-1 ring-slate-200" />
+          <div>
+            <div className="font-bold text-primary dark:text-slate-100">GUU AI Digital Brain</div>
+            <p className="text-xs text-slate-500 mt-1">© 2025 GUU AI Digital Brain. All Rights Reserved.</p>
+          </div>
         </div>
         <div className="flex flex-wrap justify-center gap-6">
           <a className="text-xs text-slate-500 hover:text-primary dark:hover:text-blue-400 transition-colors" href="https://gregoryuniversityuturu.edu.ng" target="_blank" rel="noreferrer">Official GUU Website</a>
